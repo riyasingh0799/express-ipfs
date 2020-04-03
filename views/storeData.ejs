@@ -1,0 +1,74 @@
+<!DOCTYPE HTML> 
+
+<html>
+   <head>
+      <script type = "text/javascript">
+
+         const addFile = async () => {
+            const file = localStorage.getItem('itemsArray')
+            const fileAdded = await ipfs.add({path: 'some path', content: file})
+            var filehash = await fileAdded[0].hash;	
+            console.log(filehash)
+
+            document.getElementById("demo2").href = "https://ipfs.io/ipfs/".concat(filehash)
+            document.getElementById("demo2").innerHTML = filehash
+
+         }
+
+         function appendData(lat, long, timestamp) {
+            var oldItems = JSON.parse(localStorage.getItem('itemsArray')) || [];
+            var newItem = {
+               'latitude': lat.toString(),
+               'longitude': long.toString(),
+               'timestamp': timestamp.toString()
+            }
+            oldItems.push(newItem)
+            localStorage.setItem('itemsArray', JSON.stringify(oldItems))
+
+            return oldItems
+         }
+
+         function storeLocation (position) {
+            var latitude = position.coords.latitude
+            var longitude = position.coords.longitude
+
+            var dateTime = new Date()
+            document.getElementById("demo").innerHTML = latitude.toString().concat(' ', longitude.toString(),' ', dateTime.toString())
+
+            var x = appendData(latitude, longitude, dateTime)
+            console.log(x)
+         }
+
+         function errorHandler(err) {
+            if(err.code == 1) {
+               alert("Error: Access is denied!");
+            } else if( err.code == 2) {
+               alert("Error: Position is unavailable!");
+            }
+         }
+         
+         function fetchData() {
+           if (navigator.geolocation) {
+             var options= {timeout: 6000}
+             navigator.geolocation.getCurrentPosition(storeLocation, errorHandler, options);
+           } else {
+             console.log("Geolocation is not supported by this browser.")
+           }
+         }
+			
+      </script>
+   </head>
+   <body>
+      <h1>MAP data on IPFS</h1>
+      <p id="demo"></p>
+      <a href="" id="demo2"></a>
+      <br>
+      <form>
+         <input type = "button" onclick = "fetchData()" value = "Store Data"/>
+      </form>
+      <form>
+        <input type = "button" onclick = "addFile()" value = "Add Data to IPFS"/>
+     </form>
+      
+   </body>
+</html>
